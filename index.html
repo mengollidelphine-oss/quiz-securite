@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Quel gardien de la sécurité es-tu ? 🇧🇪</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --police:      #1a3a6b;
+      --defense:     #3d5a2a;
+      --pompiers:    #b03020;
+      --gardiennage: #2c3e50;
+      --gold:        #f39c12;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f0f1e;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 15% 50%, rgba(26,58,107,.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(176,48,32,.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 55% 85%, rgba(61,90,42,.25) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── SCREENS ─────────────────────────────────── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 24px 20px;
+      animation: fadeUp .4s ease;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── INTRO ───────────────────────────────────── */
+    #screen-intro {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 22px;
+    }
+
+    .be-flag {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .be-flag span {
+      display: block;
+      width: 13px; height: 52px;
+      border-radius: 4px;
+    }
+    .be-flag .bl { background: #111; }
+    .be-flag .ye { background: #F8D030; }
+    .be-flag .re { background: #EF3340; }
+
+    .intro-icon {
+      font-size: 78px;
+      display: block;
+      animation: bob 2.6s ease-in-out infinite;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,.5));
+    }
+    @keyframes bob {
+      0%,100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-8px) scale(1.06); }
+    }
+
+    .intro-title {
+      font-size: 27px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.25;
+      text-shadow: 0 2px 10px rgba(0,0,0,.6);
+    }
+
+    .intro-sub {
+      font-size: 15px;
+      color: rgba(255,255,255,.7);
+      max-width: 310px;
+      line-height: 1.55;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .pill {
+      padding: 7px 15px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pill-police      { background: var(--police); }
+    .pill-defense     { background: var(--defense); }
+    .pill-pompiers    { background: var(--pompiers); }
+    .pill-gardiennage { background: var(--gardiennage); border: 1px solid rgba(255,255,255,.2); }
+
+    .btn {
+      padding: 15px 32px;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.4);
+      width: 100%;
+      justify-content: center;
+    }
+    .btn:active { transform: scale(.96); }
+
+    .btn-start {
+      background: linear-gradient(135deg, #f39c12, #e74c3c);
+      color: #fff;
+      font-size: 20px;
+    }
+    .btn-replay {
+      background: linear-gradient(135deg, #f39c12, #e74c3c);
+      color: #fff;
+    }
+    .btn-share {
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      border: 2px solid rgba(255,255,255,.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .intro-footer {
+      font-size: 11px;
+      color: rgba(255,255,255,.28);
+      text-align: center;
+    }
+
+    /* ── QUIZ ────────────────────────────────────── */
+    #screen-quiz {
+      gap: 18px;
+      padding-top: 38px;
+    }
+
+    .prog-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .prog-label {
+      font-size: 13px;
+      color: rgba(255,255,255,.55);
+      white-space: nowrap;
+    }
+    .prog-track {
+      flex: 1;
+      height: 8px;
+      background: rgba(255,255,255,.12);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f39c12, #e74c3c);
+      border-radius: 4px;
+      transition: width .55s ease;
+    }
+
+    .q-card {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 22px;
+      padding: 26px 20px;
+      backdrop-filter: blur(12px);
+      text-align: center;
+    }
+    .q-icon  { font-size: 42px; display: block; margin-bottom: 10px; }
+    .q-text  { font-size: 18px; font-weight: 700; color: #fff; line-height: 1.4; }
+
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px;
+    }
+
+    .ans-btn {
+      background: rgba(255,255,255,.08);
+      border: 2px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      padding: 15px 10px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .22s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      min-height: 88px;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.35;
+    }
+    .ans-btn:active { transform: scale(.96); }
+    .ans-btn:hover  {
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.35);
+      transform: translateY(-2px);
+    }
+    .ans-btn.picked {
+      border-color: var(--gold);
+      background: rgba(243,156,18,.22);
+    }
+    .ans-emoji { font-size: 27px; display: block; }
+
+    /* ── RESULT ──────────────────────────────────── */
+    #screen-result {
+      align-items: center;
+      gap: 18px;
+      padding-bottom: 30px;
+    }
+
+    .res-header { text-align: center; }
+    .res-header h2 {
+      font-size: 14px;
+      color: rgba(255,255,255,.55);
+      font-weight: 400;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .res-header h1 {
+      font-size: 21px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .res-card {
+      width: 100%;
+      border-radius: 26px;
+      padding: 28px 22px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .res-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.13), transparent 65%);
+      pointer-events: none;
+    }
+
+    .res-big-emoji {
+      font-size: 82px;
+      display: block;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 4px 14px rgba(0,0,0,.45));
+      animation: bounceIn .55s cubic-bezier(.36,.07,.19,.97);
+    }
+    @keyframes bounceIn {
+      0%   { transform: scale(0) rotate(-10deg); }
+      65%  { transform: scale(1.18) rotate(3deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+
+    .res-name    { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 6px; text-shadow: 0 2px 8px rgba(0,0,0,.4); }
+    .res-tagline { font-size: 14px; color: rgba(255,255,255,.8); font-style: italic; margin-bottom: 14px; }
+    .res-divider { width: 38px; height: 3px; background: rgba(255,255,255,.35); border-radius: 2px; margin: 14px auto; }
+    .res-desc    { font-size: 13.5px; color: rgba(255,255,255,.9); line-height: 1.6; text-align: left; }
+
+    .res-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .res-tag {
+      background: rgba(255,255,255,.2);
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .fact-box {
+      background: rgba(0,0,0,.22);
+      border-radius: 12px;
+      padding: 11px 13px;
+      margin-top: 14px;
+      text-align: left;
+    }
+    .fact-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.5); margin-bottom: 4px; }
+    .fact-text  { font-size: 13px; color: rgba(255,255,255,.82); line-height: 1.5; }
+
+    /* Score bars */
+    .scores-section { width: 100%; }
+    .scores-title {
+      font-size: 12px;
+      color: rgba(255,255,255,.45);
+      text-align: center;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 8px;
+    }
+    .score-lbl {
+      font-size: 12.5px;
+      color: rgba(255,255,255,.7);
+      width: 92px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .score-track {
+      flex: 1;
+      height: 8px;
+      background: rgba(255,255,255,.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .score-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1.1s ease;
+    }
+    .score-pct {
+      font-size: 11px;
+      color: rgba(255,255,255,.5);
+      width: 30px;
+      text-align: right;
+    }
+
+    .result-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    /* Confetti */
+    .cf {
+      position: fixed;
+      border-radius: 2px;
+      pointer-events: none;
+      animation: cfFall linear forwards;
+    }
+    @keyframes cfFall {
+      to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ══════════ INTRO ══════════ -->
+  <div id="screen-intro" class="screen active">
+    <div class="be-flag">
+      <span class="bl"></span><span class="ye"></span><span class="re"></span>
+    </div>
+
+    <span class="intro-icon">🔐</span>
+
+    <h1 class="intro-title">Quel gardien de la sécurité es-tu ?</h1>
+
+    <p class="intro-sub">
+      10 questions de personnalité pour découvrir quel métier de la sécurité belge te correspond le mieux !
+    </p>
+
+    <div class="pills">
+      <span class="pill pill-police">👮 Police</span>
+      <span class="pill pill-defense">🪖 Défense</span>
+      <span class="pill pill-pompiers">🚒 Pompiers</span>
+      <span class="pill pill-gardiennage">🛡️ Gardiennage</span>
+    </div>
+
+    <button class="btn btn-start" onclick="startQuiz()">▶&nbsp; Démarrer le quiz</button>
+
+    <p class="intro-footer">Journée Portes Ouvertes &nbsp;•&nbsp; 🇧🇪 Belgique</p>
+  </div>
+
+  <!-- ══════════ QUIZ ══════════ -->
+  <div id="screen-quiz" class="screen">
+    <div class="prog-row">
+      <span class="prog-label" id="prog-label">1 / 10</span>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:10%"></div></div>
+    </div>
+
+    <div class="q-card" id="q-card">
+      <span class="q-icon" id="q-icon"></span>
+      <p  class="q-text" id="q-text"></p>
+    </div>
+
+    <div class="answers" id="answers"></div>
+  </div>
+
+  <!-- ══════════ RESULT ══════════ -->
+  <div id="screen-result" class="screen">
+    <div class="res-header">
+      <h2>Ton profil de sécurité</h2>
+      <h1 id="res-title"></h1>
+    </div>
+
+    <div class="res-card" id="res-card">
+      <span class="res-big-emoji" id="res-emoji"></span>
+      <div class="res-name"    id="res-name"></div>
+      <div class="res-tagline" id="res-tagline"></div>
+      <div class="res-divider"></div>
+      <div class="res-desc"    id="res-desc"></div>
+      <div class="res-tags"    id="res-tags"></div>
+      <div class="fact-box">
+        <div class="fact-label">📌 Le savais-tu ?</div>
+        <div class="fact-text" id="res-fact"></div>
+      </div>
+    </div>
+
+    <div class="scores-section">
+      <div class="scores-title">Ton profil complet</div>
+      <div id="scores-bars"></div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn btn-replay" onclick="restartQuiz()">🔄&nbsp; Rejouer</button>
+      <button class="btn btn-share"  onclick="shareResult()">📤&nbsp; Partager mon résultat</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const PROFESSIONS = {
+  police: {
+    name:    "Police locale / fédérale",
+    emoji:   "👮",
+    tagline: "« Protéger et servir la communauté »",
+    desc:    "Tu as un fort sens de la justice et tu veux agir concrètement pour la sécurité des citoyens au quotidien. La police belge compte près de 43 000 agents répartis entre les zones locales et la police fédérale.",
+    tags:    ["Sens de la justice", "Sang-froid", "Écoute", "Courage"],
+    fact:    "La réforme de 2001 a créé deux niveaux : la police locale (sécurité de proximité) et la police fédérale (missions nationales & internationales, dont Interpol et Europol).",
+    gradient: "linear-gradient(140deg, #1a3a6b 0%, #2471a3 100%)",
+    barColor: "#3498db",
+  },
+  defense: {
+    name:    "Défense (Armée belge)",
+    emoji:   "🪖",
+    tagline: "« Défendre la nation, protéger le monde »",
+    desc:    "Discipliné(e), loyal(e) et prêt(e) à aller au bout du monde. La Défense belge est présente dans plus de 20 pays via des missions de paix et compte 4 composantes : Terre, Air, Marine et Médical.",
+    tags:    ["Discipline", "Résistance", "Loyauté", "Esprit d'équipe"],
+    fact:    "La Belgique dispose de chasseurs-bombardiers F-35, de frégates de marine et contribue activement aux missions OTAN et ONU. Les nouveaux F-35 remplaceront les F-16 à partir de 2025.",
+    gradient: "linear-gradient(140deg, #2d4a1e 0%, #5a8a30 100%)",
+    barColor: "#6daa3a",
+  },
+  pompiers: {
+    name:    "Pompiers",
+    emoji:   "🚒",
+    tagline: "« Intervenir, secourir, protéger »",
+    desc:    "Courageux(-se), généreux(-se) et toujours prêt(e) à foncer au secours des autres. Les pompiers belges interviennent pour incendies, accidents de la route, inondations et urgences médicales.",
+    tags:    ["Courage", "Générosité", "Réactivité", "Solidarité"],
+    fact:    "En Belgique, il existe plus de 250 zones de secours. Les services d'incendie interviennent en moyenne toutes les 2 minutes quelque part dans le pays !",
+    gradient: "linear-gradient(140deg, #8b1a10 0%, #e74c3c 100%)",
+    barColor: "#e74c3c",
+  },
+  gardiennage: {
+    name:    "Gardiennage (Sécurité privée)",
+    emoji:   "🛡️",
+    tagline: "« Prévenir, observer, protéger »",
+    desc:    "Discret(e), fiable et constamment aux aguets. Le secteur emploie plus de 25 000 personnes en Belgique et couvre la surveillance d'entreprises, la gestion d'événements et la protection de personnes.",
+    tags:    ["Vigilance", "Discrétion", "Fiabilité", "Autonomie"],
+    fact:    "La loi du 2 octobre 2017 encadre strictement le métier en Belgique. Chaque agent doit obtenir une carte d'identification délivrée par le SPF Intérieur avant de pouvoir exercer.",
+    gradient: "linear-gradient(140deg, #1c2833 0%, #4a5568 100%)",
+    barColor: "#7f8c8d",
+  },
+};
+
+const QUESTIONS = [
+  {
+    icon: "⚡",
+    text: "Face à une situation d'urgence, votre premier réflexe est...",
+    answers: [
+      { text: "Prendre le contrôle et coordonner",        emoji: "🎯", prof: "police"      },
+      { text: "Rester calme et appliquer le protocole",   emoji: "📋", prof: "defense"     },
+      { text: "Foncer aider sans hésiter",                emoji: "🏃", prof: "pompiers"    },
+      { text: "Évaluer les risques avant d'agir",         emoji: "🔍", prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "💪",
+    text: "Votre qualité principale selon vos proches est...",
+    answers: [
+      { text: "Sens de la justice",        emoji: "⚖️",  prof: "police"      },
+      { text: "Discipline et rigueur",     emoji: "🎖️",  prof: "defense"     },
+      { text: "Courage et générosité",     emoji: "❤️",  prof: "pompiers"    },
+      { text: "Discrétion et fiabilité",   emoji: "🔒",  prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "🌟",
+    text: "Ce qui vous motive le plus dans un métier, c'est...",
+    answers: [
+      { text: "Faire respecter la loi et protéger les citoyens", emoji: "👮",  prof: "police"      },
+      { text: "Servir la nation et ses valeurs",                  emoji: "🇧🇪", prof: "defense"     },
+      { text: "Sauver des vies",                                  emoji: "💊",  prof: "pompiers"    },
+      { text: "Assurer la sécurité d'un lieu ou d'un événement", emoji: "🏟️",  prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "🌙",
+    text: "Vous préférez travailler...",
+    answers: [
+      { text: "En patrouille dans les rues de la ville",      emoji: "🚔", prof: "police"      },
+      { text: "En mission, même à l'étranger",                emoji: "✈️", prof: "defense"     },
+      { text: "En équipe soudée face au danger",              emoji: "🚒", prof: "pompiers"    },
+      { text: "De nuit ou en horaires décalés, en autonomie", emoji: "🌙", prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "🧠",
+    text: "En cas de conflit entre personnes, vous...",
+    answers: [
+      { text: "Intervenez pour rétablir l'ordre",                 emoji: "🛑", prof: "police"      },
+      { text: "Agissez de manière stratégique et calculée",       emoji: "♟️", prof: "defense"     },
+      { text: "Protégez les plus vulnérables en priorité",        emoji: "🫂", prof: "pompiers"    },
+      { text: "Désamorcez calmement et discrètement la tension",  emoji: "🤝", prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "🏋️",
+    text: "Vous aimeriez être formé(e) à...",
+    answers: [
+      { text: "La maîtrise physique et les techniques d'interpellation", emoji: "🥋", prof: "police"      },
+      { text: "Les tactiques militaires et l'utilisation d'armements",   emoji: "🎯", prof: "defense"     },
+      { text: "La lutte incendie et les premiers secours",                emoji: "🧯", prof: "pompiers"    },
+      { text: "La surveillance, les rondes et la gestion des accès",     emoji: "📹", prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "👕",
+    text: "Quel uniforme vous attirerait le plus ?",
+    answers: [
+      { text: "Tenue bleue avec badge officiel",         emoji: "🔵", prof: "police"      },
+      { text: "Tenue de camouflage militaire",           emoji: "🟢", prof: "defense"     },
+      { text: "Combinaison rouge ignifugée",             emoji: "🔴", prof: "pompiers"    },
+      { text: "Tenue noire professionnelle sobre",       emoji: "⚫", prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "🌍",
+    text: "Votre rapport à la hiérarchie est...",
+    answers: [
+      { text: "Je la respecte et je suis capable de l'incarner", emoji: "🌟",       prof: "police"      },
+      { text: "Structure stricte, j'adhère totalement",           emoji: "📐",       prof: "defense"     },
+      { text: "Confiance mutuelle au sein de l'équipe",           emoji: "🫱🏼‍🫲🏻", prof: "pompiers"    },
+      { text: "Je suis autonome mais pleinement responsable",     emoji: "🧭",       prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "🎮",
+    text: "En dehors du travail, vous aimez plutôt...",
+    answers: [
+      { text: "Sports collectifs ou arts martiaux",             emoji: "⚽", prof: "police"      },
+      { text: "Randonnée, escalade, activités nature intense",  emoji: "🏔️", prof: "defense"     },
+      { text: "Bénévolat, aide aux autres",                     emoji: "🤲", prof: "pompiers"    },
+      { text: "Observer et analyser l'environnement",           emoji: "👁️", prof: "gardiennage" },
+    ],
+  },
+  {
+    icon: "🦸",
+    text: "Votre figure héroïque idéale est plutôt...",
+    answers: [
+      { text: "L'inspecteur qui résout des enquêtes complexes",         emoji: "🔎", prof: "police"      },
+      { text: "Le soldat qui défend son pays sous pression extrême",    emoji: "🎖️", prof: "defense"     },
+      { text: "Le pompier qui entre dans les flammes pour autrui",      emoji: "🔥", prof: "pompiers"    },
+      { text: "L'agent vigilant qui empêche le pire discrètement",      emoji: "🛡️", prof: "gardiennage" },
+    ],
+  },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+let currentQ = 0;
+let scores   = { police: 0, defense: 0, pompiers: 0, gardiennage: 0 };
+let locked   = false;
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - .5); }
+
+// ─── QUIZ LOGIC ──────────────────────────────────────────────────────────────
+
+function startQuiz() {
+  currentQ = 0;
+  scores   = { police: 0, defense: 0, pompiers: 0, gardiennage: 0 };
+  locked   = false;
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  locked = false;
+  const q   = QUESTIONS[currentQ];
+  const idx = currentQ + 1;
+  const tot = QUESTIONS.length;
+
+  document.getElementById('prog-label').textContent = `${idx} / ${tot}`;
+  document.getElementById('prog-fill').style.width  = `${(idx / tot) * 100}%`;
+  document.getElementById('q-icon').textContent     = q.icon;
+  document.getElementById('q-text').textContent     = q.text;
+
+  const grid = document.getElementById('answers');
+  grid.innerHTML = '';
+
+  shuffle(q.answers).forEach(ans => {
+    const btn = document.createElement('button');
+    btn.className   = 'ans-btn';
+    btn.innerHTML   = `<span class="ans-emoji">${ans.emoji}</span>${ans.text}`;
+    btn.onclick     = () => pick(btn, ans.prof);
+    grid.appendChild(btn);
+  });
+}
+
+function pick(btn, prof) {
+  if (locked) return;
+  locked = true;
+  btn.classList.add('picked');
+  scores[prof]++;
+  setTimeout(() => {
+    if (currentQ < QUESTIONS.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 420);
+}
+
+// ─── RESULT ──────────────────────────────────────────────────────────────────
+
+function showResult() {
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const winner = sorted[0][0];
+  const p      = PROFESSIONS[winner];
+  const total  = QUESTIONS.length;
+
+  document.getElementById('res-title').textContent  = 'Tu es fait(e) pour ça !';
+  document.getElementById('res-emoji').textContent  = p.emoji;
+  document.getElementById('res-name').textContent   = p.name;
+  document.getElementById('res-tagline').textContent= p.tagline;
+  document.getElementById('res-desc').textContent   = p.desc;
+  document.getElementById('res-fact').textContent   = p.fact;
+
+  document.getElementById('res-tags').innerHTML =
+    p.tags.map(t => `<span class="res-tag">${t}</span>`).join('');
+
+  document.getElementById('res-card').style.background = p.gradient;
+
+  // score bars
+  const barsEl = document.getElementById('scores-bars');
+  barsEl.innerHTML = '';
+  sorted.forEach(([key, score]) => {
+    const pr  = PROFESSIONS[key];
+    const pct = Math.round((score / total) * 100);
+    barsEl.innerHTML += `
+      <div class="score-row">
+        <div class="score-lbl">${pr.emoji} ${pr.name.split(' ')[0]}</div>
+        <div class="score-track">
+          <div class="score-bar" style="width:${pct}%;background:${pr.barColor}"></div>
+        </div>
+        <div class="score-pct">${pct}%</div>
+      </div>`;
+  });
+
+  showScreen('result');
+  confetti();
+}
+
+function restartQuiz() { startQuiz(); }
+
+function shareResult() {
+  const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  const p      = PROFESSIONS[winner];
+  const text   = `🇧🇪 Quiz Sécurité Belge\nMon profil : ${p.emoji} ${p.name}\n${p.tagline}\n\nDécouvre le tien !`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'Quel gardien de la sécurité es-tu ?', text }).catch(() => copy(text));
+  } else {
+    copy(text);
+  }
+}
+
+function copy(text) {
+  navigator.clipboard.writeText(text)
+    .then(()  => alert('Résultat copié dans le presse-papier ! 📋'))
+    .catch(()  => alert('Partage non disponible sur cet appareil.'));
+}
+
+// ─── CONFETTI ────────────────────────────────────────────────────────────────
+
+function confetti() {
+  const palette = ['#F8D030','#EF3340','#000','#3498db','#e74c3c','#6daa3a','#fff'];
+  for (let i = 0; i < 70; i++) {
+    setTimeout(() => {
+      const el   = document.createElement('div');
+      el.className = 'cf';
+      el.style.cssText = `
+        left:${Math.random()*100}vw; top:-12px;
+        width:${6 + Math.random()*8}px; height:${6 + Math.random()*8}px;
+        background:${palette[Math.floor(Math.random()*palette.length)]};
+        animation-duration:${1.4 + Math.random()*2.2}s;
+        transform:rotate(${Math.random()*360}deg);
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 28);
+  }
+}
+</script>
+</body>
+</html>
